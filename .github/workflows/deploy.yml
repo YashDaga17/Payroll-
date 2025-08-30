@@ -15,13 +15,40 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 8
+          version: 9
+
+      - name: Verify pnpm installation
+        run: |
+          pnpm --version
+          pnpm config get store-dir
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'pnpm'
+
+      - name: Debug lockfile and environment
+        run: |
+          echo "=== Environment Info ==="
+          echo "Node version: $(node --version)"
+          echo "pnpm version: $(pnpm --version)"
+          echo "Working directory: $(pwd)"
+          echo ""
+          echo "=== Lockfile Info ==="
+          if [ -f "pnpm-lock.yaml" ]; then
+            echo "pnpm-lock.yaml exists"
+            echo "Lockfile size: $(wc -l < pnpm-lock.yaml) lines"
+            echo "First 5 lines of lockfile:"
+            head -5 pnpm-lock.yaml
+          else
+            echo "pnpm-lock.yaml not found!"
+            ls -la
+          fi
+          echo ""
+          echo "=== Package.json Info ==="
+          echo "package.json dependencies count: $(jq '.dependencies | length' package.json)"
+          echo "package.json devDependencies count: $(jq '.devDependencies | length' package.json)"
 
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
